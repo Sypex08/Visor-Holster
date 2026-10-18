@@ -12,7 +12,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "your.mod.template.fabric.TemplateMod"
+      "dev.sypex08.visorholster.fabric.VisorHolster"
     ]
   },
   "mixins": [

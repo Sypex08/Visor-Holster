@@ -1,7 +1,7 @@
 {
   "required": true,
-  "package": "your.mod.template.core.mixin",
-  "plugin": "your.mod.template.core.mixin.MixinConfig",
+  "package": "dev.sypex08.visorholster.core.mixin",
+  "plugin": "dev.sypex08.visorholster.core.mixin.MixinConfig",
   "compatibilityLevel": "JAVA_17",
   "client": [
   ],

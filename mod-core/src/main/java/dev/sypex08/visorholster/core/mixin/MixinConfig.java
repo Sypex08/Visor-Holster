@@ -1,7 +1,7 @@
-package your.mod.template.core.mixin;
+package dev.sypex08.visorholster.core.mixin;
 
 import org.vmstudio.visor.api.ModLoader;
-import your.mod.template.core.common.VisorTemplate;
+import dev.sypex08.visorholster.core.common.VisorHolster;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MixinConfig implements IMixinConfigPlugin {
-    private static final Logger LOGGER = LoggerFactory.getLogger(VisorTemplate.MOD_NAME);
+    private static final Logger LOGGER = LoggerFactory.getLogger(VisorHolster.MOD_NAME);
 
     @Override
     public String getRefMapperConfig() {
@@ -47,9 +47,9 @@ public class MixinConfig implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (!ModLoader.get().isModLoaded(VisorTemplate.MOD_ID)) {
+        if (!ModLoader.get().isModLoaded(VisorHolster.MOD_ID)) {
             LOGGER.info("{} failed to load, canceled applying mixin '{}'",
-                    VisorTemplate.MOD_NAME, mixinClassName
+                    VisorHolster.MOD_NAME, mixinClassName
             );
             return false;
         }

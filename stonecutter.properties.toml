@@ -1,11 +1,11 @@
 # ---- Mod --------------------------------------------------------------------------------------
 # Every key of this file is also a ${...} placeholder in fabric.mod.json, META-INF/*.toml and pack.mcmeta
-mod_id = "visor_template"
-mod_name = "VisorTemplate"
+mod_id = "visor_holster"
+mod_name = "VisorHolster"
 mod_version = "1.0.0"
-mod_group = "your.mod"
-mod_authors = "PhoenixRa"
-mod_description = "The Template Addon for Visor"
+mod_group = "dev.sypex08.visorholster"
+mod_authors = "Sypex_08"
+mod_description = "Holsters for Visor"
 mod_license = "MIT"
 
 visor_version = "0.6.0"
