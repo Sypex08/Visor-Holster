@@ -1,0 +1,38 @@
+plugins {
+    id "dev.kikugie.stonecutter"
+}
+
+// Currently used version
+// Switch with `gradlew "Set active project to <version>"`,
+// go back with `gradlew "Reset active project"`.
+stonecutter.active "1.21.1" /* [SC] DO NOT EDIT */
+
+// ------ Generated build tasks ------------------------------------
+def collectByVersion = new TreeMap()
+stonecutter.tree.getBranches().each { branch ->
+    if (branch.getId() == "mod-core") return
+    branch.getNodes().each { node ->
+        def mcVersion = node.getMetadata().getVersion()
+        collectByVersion.computeIfAbsent(mcVersion) { [] } << ":${branch.getId()}:${mcVersion}:buildAndCollect"
+    }
+}
+collectByVersion.each { mcVersion, paths ->
+    tasks.register("build-${mcVersion}") {
+        group = "build version"
+        description = "Builds every loader for Minecraft ${mcVersion} into <root>/build/libs"
+        dependsOn paths
+    }
+}
+tasks.register("buildAll") {
+    group = "build version"
+    description = "Builds every loader for every Minecraft version into <root>/build/libs"
+    dependsOn collectByVersion.values().flatten()
+}
+
+// ------ StoneCutter parameters --------------------------------------
+stonecutter.parameters {
+    // Access wideners name the unobfuscated Minecraft of 26.1+ "official", the remapped one "named"
+    replacements.regex(stonecutter.eval(current.version, ">=26.1")) {
+        replace("accessWidener\\tv1\\tnamed", "accessWidener\tv1\tofficial", "accessWidener\\tv1\\tofficial", "accessWidener\tv1\tnamed")
+    }
+}

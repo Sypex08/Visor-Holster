@@ -1,0 +1,13 @@
+// Build script of every ":mod-fabric:<mc>" subproject.
+plugins {
+    id "addon.loader"
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+}
+
+loom {
+    injectAccessWidener(tasks.named(unobfuscated ? "jar" : "remapJar"))
+}

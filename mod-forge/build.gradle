@@ -1,0 +1,23 @@
+// Build script of every ":mod-forge:<mc>" subproject.
+plugins {
+    id "addon.loader"
+}
+
+configurations {
+    fabricAnnotations { canBeConsumed = false; canBeResolved = true; transitive = false }
+}
+sourceSets.main.compileClasspath += configurations.fabricAnnotations
+
+dependencies {
+    forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    fabricAnnotations "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+}
+
+loom {
+    forge {
+        mixinConfig "mod.mixins.json"
+        convertAccessWideners(tasks.named(unobfuscated ? "jar" : "remapJar"), "mod.accesswidener")
+    }
+}

@@ -1,0 +1,48 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven { name = "Fabric"; url = "https://maven.fabricmc.net/" }
+        maven { name = "Architectury"; url = "https://maven.architectury.dev/" }
+        maven { name = "Forge"; url = "https://maven.minecraftforge.net/" }
+        maven { name = "NeoForge"; url = "https://maven.neoforged.net/releases/" }
+        maven { name = "Stonecutter"; url = "https://maven.kikugie.dev/releases" }
+    }
+}
+
+plugins {
+    id "dev.kikugie.stonecutter" version "0.9.8"
+    // Downloads the JDK that java_version asks for when it is not installed
+    id "org.gradle.toolchains.foojay-resolver-convention" version "1.0.0"
+}
+
+rootProject.name = "VisorAddonMultiversion"
+
+// ----- Version targets from stonecutter.properties.toml -----------------
+def targets = stonecutter.properties.rawOrNull("targets")
+if (targets == null) {
+    throw new GradleException("stonecutter.properties.toml needs a [targets] table!")
+}
+def loadersByVersion = new TreeMap()
+targets.asMap().each { version, loaders ->
+    loadersByVersion[version] = loaders.asList().collect { it.asPrimitive().content.toString() }
+}
+def versionsFor = { String loader -> loadersByVersion.findAll { it.value.contains(loader) }.keySet() as String[] }
+
+stonecutter {
+    kotlinController = false            // use Groovy
+    centralScript = "build.gradle"      // <branch>/build.gradle
+
+    create(rootProject) {
+        // The shared code, every version
+        branch("mod-core") { versions(loadersByVersion.keySet() as String[]) }
+
+        // Mod loader branches, the versions each one is built for
+        branch("mod-fabric")   { versions(versionsFor("fabric")) }
+        branch("mod-forge")    { versions(versionsFor("forge")) }
+        branch("mod-neoforge") { versions(versionsFor("neoforge")) }
+
+        // The version the sources are committed in
+        vcsVersion = "1.21.1"
+    }
+}

@@ -1,0 +1,31 @@
+// Build script of every ":mod-neoforge:<mc>" subproject.
+plugins {
+    id "addon.loader"
+}
+
+configurations {
+    fabricAnnotations { canBeConsumed = false; canBeResolved = true; transitive = false }
+}
+sourceSets.main.compileClasspath += configurations.fabricAnnotations
+
+dependencies {
+    neoForge "net.neoforged:neoforge:${neoforge_version}"
+
+    fabricAnnotations "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+}
+
+loom {
+    neoForge {
+        convertAccessWideners(tasks.named(unobfuscated ? "jar" : "remapJar"), "mod.accesswidener")
+    }
+}
+
+processResources {
+    if (stonecutter.eval(minecraft_version, ">=1.20.3")) {
+        filesMatching("META-INF/neoforge.mods.toml") { filter { it.replace("mandatory = true", "type = \"required\"") } }
+    }
+    if (stonecutter.eval(minecraft_version, "<1.20.5")) {
+        filesMatching("META-INF/neoforge.mods.toml") { name = "mods.toml" }
+    }
+}

@@ -1,0 +1,83 @@
+/*
+ * Plugin applied to EVERY versioned subproject (":mod-core:<mc>", ":mod-fabric:<mc>" etc).
+ */
+plugins {
+    id "java-library"
+}
+
+// ---- Identity -----------------------------------------------------------------------------
+def minecraftVersion = stonecutter.current.version
+project.ext.minecraft_version = minecraftVersion
+project.ext.branch = project.parent.name - "mod-"
+
+group = "${mod_group}.${mod_id}.${branch}"
+base.archivesName = mod_name
+version = "${mod_version}+mc${minecraftVersion}-${branch}"
+
+// ---- Loom ---------------------------------------------------------------------------------
+ext.set("loom.platform", project.parent.findProperty("loom.platform") ?: "fabric")
+
+// For Unobfuscated Minecraft from 26.1
+def unobfuscated = stonecutter.eval(minecraftVersion, ">=26.1")
+project.ext.unobfuscated = unobfuscated
+pluginManager.apply(unobfuscated ? "dev.architectury.loom-no-remap" : "dev.architectury.loom")
+
+if (unobfuscated) {
+    // The mod* configurations of the remapping Loom, so the dependencies read the same on every version
+    ["Api", "Implementation", "CompileOnly", "RuntimeOnly", "LocalRuntime"].each { bucket ->
+        def plain = configurations.findByName(bucket.uncapitalize())
+        if (plain != null && configurations.findByName("mod${bucket}") == null) {
+            plain.extendsFrom(configurations.create("mod${bucket}") { canBeConsumed = false; canBeResolved = false })
+        }
+    }
+    configurations.register("namedElements") {
+        canBeConsumed = true
+        canBeResolved = false
+        extendsFrom configurations.api
+    }
+    artifacts.add("namedElements", tasks.named("jar"))
+}
+
+loom {
+    accessWidenerPath = stonecutter.process(rootProject.file("mod-core/src/main/resources/mod.accesswidener"), "build/mod.accesswidener")
+}
+
+// ---- Java ---------------------------------------------------------------------------------
+def javaVersion = java_version as int
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(javaVersion)
+    withSourcesJar()
+}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = javaVersion
+}
+
+// ---- Dependencies -------------------------------------------------------------------------
+repositories {
+    maven { name = "Forge"; url = "https://maven.minecraftforge.net/" }
+    maven { name = "NeoForge"; url = "https://maven.neoforged.net/releases/" }
+    maven { name = "Fabric"; url = "https://maven.fabricmc.net/" }
+    maven { name = "Parchment"; url = "https://maven.parchmentmc.org" }
+    exclusiveContent {
+        forRepository { maven { name = "Modrinth"; url = "https://api.modrinth.com/maven" } }
+        filter { includeGroup "maven.modrinth" }
+    }
+}
+
+def parchmentVersion = findProperty("parchment_version")
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraftVersion}"
+    if (!unobfuscated) {
+        mappings loom.layered {
+            officialMojangMappings()
+            if (parchmentVersion) {
+                parchment("org.parchmentmc.data:parchment-${minecraftVersion}:${parchmentVersion}@zip")
+            }
+        }
+    }
+
+    compileOnly "org.jetbrains:annotations:26.1.0"
+    compileOnly "org.projectlombok:lombok:1.18.46"
+    annotationProcessor "org.projectlombok:lombok:1.18.46"
+}

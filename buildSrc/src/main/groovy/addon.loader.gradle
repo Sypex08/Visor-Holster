@@ -1,0 +1,90 @@
+/* Plugin applied to the MOD LOADER subprojects */
+plugins {
+    id "addon.minecraft"
+}
+
+def loader = branch
+def corePath = ":mod-core:${minecraft_version}"
+def visorMod = "maven.modrinth:visor:${visor_version}+mc${minecraft_version}-${loader}"
+
+// ---- Shared sources: mod-core, as Stonecutter wrote it for this version ---------------------
+configurations {
+    commonJava      { canBeConsumed = false; canBeResolved = true }
+    commonResources { canBeConsumed = false; canBeResolved = true }
+}
+
+dependencies {
+    compileOnly project(path: corePath, configuration: "namedElements")
+    commonJava      project(path: corePath, configuration: "commonJava")
+    commonResources project(path: corePath, configuration: "commonResources")
+
+    modCompileOnly "${visorMod}:api"
+    modLocalRuntime visorMod
+}
+
+if (!unobfuscated) {
+    def visorJar = configurations.detachedConfiguration(dependencies.create(visorMod))
+    dependencies {
+        localRuntime files({ zipTree(visorJar.singleFile).matching { include "META-INF/jars/*.jar"; exclude "META-INF/jars/fabric-*" }.files })
+    }
+}
+
+compileJava {
+    dependsOn configurations.commonJava
+    source configurations.commonJava
+}
+sourcesJar {
+    dependsOn configurations.commonJava
+    from configurations.commonJava
+}
+
+// ---- Resources ----------------------------------------------------------------------------
+def packFormatFields = stonecutter.eval(minecraft_version, ">=1.21.9")
+        ? "\"pack_format\": ${pack_format},\n    \"supported_formats\": [64, ${data_pack_format}],\n" +
+          "    \"min_format\": 64,\n    \"max_format\": ${data_pack_format}"
+        : "\"pack_format\": ${pack_format}"
+
+def placeholders = [
+        mod_id                           : mod_id,
+        mod_name                         : mod_name,
+        mod_version                      : mod_version,
+        mod_authors                      : mod_authors,
+        mod_description                  : mod_description,
+        mod_license                      : mod_license,
+        java_version                     : java_version,
+        pack_format_fields               : packFormatFields,
+        minecraft_version_range_fabric   : minecraft_version_range_fabric,
+        minecraft_version_range_forgelike: minecraft_version_range_forgelike,
+        fabric_loader_version_range      : findProperty("fabric_loader_version_range") ?: "",
+        forge_version_range              : findProperty("forge_version_range") ?: "",
+        neoforge_version_range           : findProperty("neoforge_version_range") ?: "",
+        visor_version_range_fabric       : visor_version_range_fabric,
+        visor_version_range_forgelike    : visor_version_range_forgelike,
+].collectEntries { key, value -> [(key): value.toString()] }
+
+processResources {
+    dependsOn configurations.commonResources
+    from configurations.commonResources
+    inputs.properties(placeholders)
+    filesMatching(["fabric.mod.json", "META-INF/*.toml", "pack.mcmeta"]) { expand(placeholders) }
+}
+
+// ---- Running --------------------------------------------------------------------------------
+loom {
+    runs {
+        configureEach {
+            ideConfigGenerated stonecutter.current.active
+            configName = "${loader.capitalize()} ${minecraft_version} ${name}"
+            runDir "../../../run/${loader}/${minecraft_version}/${name}"
+        }
+    }
+}
+
+// ---- Build ----------------------------------------------------------------------------------
+tasks.register("buildAndCollect", Copy) {
+    group = "build"
+    description = "Builds the ${loader} ${minecraft_version} jar and copies it to <root>/build/libs"
+    dependsOn "build"
+    from tasks.named(unobfuscated ? "jar" : "remapJar")
+    into rootProject.layout.buildDirectory.dir("libs")
+}

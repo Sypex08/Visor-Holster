@@ -1,0 +1,29 @@
+// Build script of every ":mod-core:<mc>" subproject: the shared code, compiled against vanilla Minecraft.
+plugins {
+    id "addon.minecraft"
+}
+
+dependencies {
+    // @Environment and Mixin
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+
+    modCompileOnly "maven.modrinth:visor:${visor_version}+mc${minecraft_version}-fabric:api"
+}
+
+if (!unobfuscated) {
+    tasks.named("remapJar") { enabled = false }
+    tasks.named("remapSourcesJar") { enabled = false }
+}
+
+configurations {
+    commonJava      { canBeConsumed = true; canBeResolved = false }
+    commonResources { canBeConsumed = true; canBeResolved = false }
+}
+afterEvaluate {
+    def generate = tasks.named("stonecutterGenerate")
+    sourceSets.main.java.srcDirs.each { dir -> artifacts.add("commonJava", dir) { builtBy generate } }
+    sourceSets.main.resources.srcDirs.each { dir -> artifacts.add("commonResources", dir) { builtBy generate } }
+}
+
+loom.runs.configureEach { ideConfigGenerated false }
+tasks.matching { it.name in ["runClient", "runServer"] }.configureEach { enabled = false }
