@@ -18,7 +18,7 @@ dependencies {
     commonJava      project(path: corePath, configuration: "commonJava")
     commonResources project(path: corePath, configuration: "commonResources")
 
-    modCompileOnly "${visorMod}:api"
+    modCompileOnly  visorMod //if issue change back to "${visorMod}:api"
     modLocalRuntime visorMod
 }
 

@@ -37,9 +37,9 @@ public final class NeoforgeWorldRenderHook {
 
         PoseStack poseStack = event.getPoseStack();
 
-        //TODO WRONG ROTATION
+        //TODO ADD positioning (maybe)
 
-        HolsterRenderer.render(poseStack, buffers, event.getCamera());
+        HolsterRenderer.render(poseStack, buffers);
 
         buffers.endBatch(HolsterRenderer.RENDER_TYPE);
     }

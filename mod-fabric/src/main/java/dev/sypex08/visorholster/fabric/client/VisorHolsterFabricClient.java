@@ -6,7 +6,6 @@ public class VisorHolsterFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
 
-        FabricWorldRenderHook.register();
 
 
     }

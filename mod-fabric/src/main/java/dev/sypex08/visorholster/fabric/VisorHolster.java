@@ -15,7 +15,7 @@ public class VisorHolster implements ModInitializer {
             );
         }else{
             VisorAPI.registerAddon(
-                    new HolsterAddonClient()
+                    new VisorHolsterAddonClient()
             );
         }
     }

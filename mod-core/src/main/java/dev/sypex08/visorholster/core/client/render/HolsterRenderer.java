@@ -4,20 +4,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.sypex08.visorholster.core.common.VisorHolster;
 import dev.sypex08.visorholster.core.common.holster.HolsterState;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3fc;
-import org.vmstudio.visor.api.VisorAPI;
-import org.vmstudio.visor.api.common.player.VRBodyPartType;
-import org.vmstudio.visor.api.common.player.VisorPlayer;
 
-import static com.mojang.text2speech.Narrator.LOGGER;
+
 
 public class HolsterRenderer {
 
@@ -34,85 +28,39 @@ public class HolsterRenderer {
     private HolsterRenderer(){
     }
 
-    public static void render(PoseStack poseStack, MultiBufferSource buffers, Camera camera) {
-
+    public static void render(
+            PoseStack poseStack,
+            MultiBufferSource buffers
+    ) {
         Minecraft minecraft = Minecraft.getInstance();
 
-        if (minecraft.player == null || VisorHolster.holsterManager == null) {
+        if (minecraft.player == null
+                || VisorHolster.holsterManager == null
+                || buffers == null) {
             return;
         }
 
-        VisorPlayer VRplayer = VisorAPI.getVisorPlayer(minecraft.player);
+        HolsterState state =
+                VisorHolster.holsterManager.get(minecraft.player.getUUID());
 
-
-        HolsterState state = VisorHolster.holsterManager.get(minecraft.player.getUUID());
-
-        if(!state.visable){
+        if (state == null || !state.visable) {
             return;
         }
-
-        float partialTick = minecraft.getTimer().getGameTimeDeltaPartialTick(false);
-
-        Vec3 playerPosition = minecraft.player.getPosition(partialTick);
-
-        Vec3 cameraPosition = camera.getPosition(); // might need to be changed to visor camera
-
-        Vector3fc look = null;
-        double bodyHeight = 0;
-
-        if(VisorAPI.getVRPlayer(minecraft.player) == null){
-            bodyHeight = minecraft.player.getBbHeight() * 0.55;
-            look = camera.getLookVector();
-        }
-        else if(VisorAPI.getVRPlayer(minecraft.player).isVR()){
-
-            VisorPlayer vrPlayer = VisorAPI.getVRPlayer(minecraft.player);
-
-            bodyHeight = vrPlayer.asVR().getActualHeight() - (vrPlayer.asVR().getActualHeight() * 1.45);
-
-            look = VisorAPI.getVRPlayer(minecraft.player).asVR().getPoseData().getPose(VRBodyPartType.HEAD).getDirection();
-
-        }
-
-
-        double horizalLength = Math.sqrt(look.x() * look.x() + look.z() * look.z());
-
-        double flatX = 0.0;
-        double flatZ = 0.0;
-
-        if (horizalLength > 0.0001){
-            flatX = look.x() / horizalLength;
-            flatZ = look.z() / horizalLength;
-        }
-
-        double forwardDistance = 0.25;
-        double sideDistance = 0.35;
-
-        double rightX = -flatZ;
-        double rightZ = flatX;
-
-
-
-        Vec3 sphereWorldPosition =
-                playerPosition.add(
-                        flatX * forwardDistance + rightX * sideDistance,
-                        bodyHeight,
-                        flatZ * forwardDistance + rightZ * sideDistance
-                );
-
-        Vec3 relativePosition = sphereWorldPosition.subtract(cameraPosition);
-
+        //TODO ISSUE: ONLY RENDERING IN RIGHT EYE
         poseStack.pushPose();
-
-        poseStack.translate(relativePosition.x, relativePosition.y, relativePosition.z);
 
         VertexConsumer consumer =
                 buffers.getBuffer(RENDER_TYPE);
 
-        renderSphere(poseStack, consumer, 0.125f, 12, 24);
+        renderSphere(
+                poseStack,
+                consumer,
+                0.125f,
+                12,
+                24
+        );
 
         poseStack.popPose();
-
     }
 
     private static void renderSphere(

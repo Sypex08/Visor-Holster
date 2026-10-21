@@ -1,7 +1,5 @@
 package dev.sypex08.visorholster.core.client;
 
-import dev.sypex08.visorholster.core.client.render.VisorRenderHook;
-import org.vmstudio.visor.api.VisorAPI;
 import org.vmstudio.visor.api.common.addon.VisorAddon;
 import dev.sypex08.visorholster.core.common.VisorHolster;
 import net.minecraft.network.chat.Component;
@@ -15,8 +13,6 @@ public class HolsterAddonClient implements VisorAddon {
     public void onAddonLoad() {
 
         VisorHolster.init();
-
-        VisorAPI.eventBus().registerListener(this, VisorRenderHook.INSTANCE);
 
 
     }

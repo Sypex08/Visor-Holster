@@ -16,7 +16,7 @@ plugins {
     id "org.gradle.toolchains.foojay-resolver-convention" version "1.0.0"
 }
 
-rootProject.name = "VisorAddonMultiversion"
+rootProject.name = "VisorHolster"
 
 // ----- Version targets from stonecutter.properties.toml -----------------
 def targets = stonecutter.properties.rawOrNull("targets")
