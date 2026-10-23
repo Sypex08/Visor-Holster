@@ -15,7 +15,7 @@ public class VisorHolster {
             );
         }else{
             VisorAPI.registerAddon(
-                    new HolsterAddonClient()
+                    new VisorHolsterAddonClient()
             );
         }
     }

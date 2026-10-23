@@ -14,7 +14,6 @@ public class HolsterAddonClient implements VisorAddon {
 
         VisorHolster.init();
 
-
     }
 
     @Override

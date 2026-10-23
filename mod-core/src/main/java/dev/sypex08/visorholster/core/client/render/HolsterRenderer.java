@@ -20,10 +20,18 @@ public class HolsterRenderer {
     public static final RenderType RENDER_TYPE = RenderType.entityTranslucent(WHITE_TEXTURE);
 
 
-    private static final int RED = 80;
-    private static final int GREEN = 180;
-    private static final int BLUE = 255;
-    private static final int ALPHA = 130;
+    private static int RED = 80;
+    private static int GREEN = 180;
+    private static int BLUE = 255;
+    private static int ALPHA = 130;
+
+    public static void setColor(int red, int green, int blue, int alpha){
+
+        RED = red;
+        GREEN = green;
+        BLUE = blue;
+        ALPHA = alpha;
+    }
 
     private HolsterRenderer(){
     }
@@ -46,7 +54,6 @@ public class HolsterRenderer {
         if (state == null || !state.visable) {
             return;
         }
-        //TODO ISSUE: ONLY RENDERING IN RIGHT EYE
         poseStack.pushPose();
 
         VertexConsumer consumer =

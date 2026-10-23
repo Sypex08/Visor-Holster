@@ -1,6 +1,10 @@
-package dev.sypex08.visorholster.core.client.render;
+package dev.sypex08.visorholster.fabric.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.sypex08.visorholster.core.client.render.HolsterRenderer;
+import dev.sypex08.visorholster.core.common.holster.HolsterInteractionCheck;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.phys.Vec3;
@@ -12,6 +16,7 @@ import org.vmstudio.visor.api.client.player.pose.VRPlayerPoseClient;
 import org.vmstudio.visor.api.client.render.VRRenderPass;
 import org.vmstudio.visor.api.client.render.decoration.VRDecorator;
 import org.vmstudio.visor.api.client.render.decoration.annotations.RegisterVRGameEffect;
+import org.vmstudio.visor.api.common.HandType;
 import org.vmstudio.visor.api.common.addon.VisorAddon;
 import org.vmstudio.visor.core.client.render.camera.VRCameraEntitySwap;
 import org.vmstudio.visor.core.client.render.helpers.RenderPoseHelper;
@@ -19,6 +24,8 @@ import org.vmstudio.visor.core.client.render.helpers.RenderPoseHelper;
 
 @RegisterVRGameEffect
 public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.decoration.effects.VRGameEffect{
+
+    private static boolean wasTouching;
 
     public HolsterVRGameEffect(@NotNull VisorAddon owner) {
         super(owner);
@@ -39,7 +46,7 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
 
         Minecraft minecraft = Minecraft.getInstance();
 
-        MultiBufferSource bufferSource = minecraft.renderBuffers().bufferSource();
+        MultiBufferSource.BufferSource bufferSource = minecraft.renderBuffers().bufferSource();
 
         VRPlayerPoseClient renderPose = VisorAPI.client().getVRLocalPlayer().getPoseData(PlayerPoseType.RENDER);
 
@@ -73,9 +80,26 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
                 rightZ * sideDistance + forwardZ * forwardDistance
         );
 
+
+        if (vrRenderPass == VRRenderPass.worldUpdater()){
+            HandType activeHand = VisorAPI.client().getVRLocalPlayer().getActiveHand();
+
+            Vec3 handWorldPosition = renderPose.getHand(activeHand).getPositionVec3();
+
+            boolean touching = HolsterInteractionCheck.isTouching(handWorldPosition,orbWorldPosition);
+
+
+            if(touching && !wasTouching){
+
+                //TODO add server logic
+
+            }
+
+            wasTouching = touching;
+
+        }
+
         Vec3 playerRelativePos = orbWorldPosition.subtract(cameraPosition);
-
-
 
         poseStack.pushPose();
         poseStack.setIdentity();
@@ -87,6 +111,7 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
 
         try {
             HolsterRenderer.render(poseStack, bufferSource);
+            bufferSource.endBatch(HolsterRenderer.RENDER_TYPE);
 
         } finally {
             poseStack.popPose();
