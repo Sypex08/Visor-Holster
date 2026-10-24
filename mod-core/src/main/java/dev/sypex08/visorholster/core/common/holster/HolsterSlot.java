@@ -13,7 +13,7 @@ public class HolsterSlot {
 
     public boolean insert(ItemStack from) {
         if (!stack.isEmpty() || from.isEmpty()) return false;
-        stack = from.split(1);
+        stack = from.split(from.getCount());
         return true;
     }
 

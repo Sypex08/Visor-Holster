@@ -2,22 +2,29 @@ package dev.sypex08.visorholster.core.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import dev.sypex08.visorholster.core.common.VisorHolster;
 import dev.sypex08.visorholster.core.common.holster.HolsterState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 
 
 public class HolsterRenderer {
 
     private static final ResourceLocation WHITE_TEXTURE = ResourceLocation.withDefaultNamespace("textures/misc/white.png");
 
-    public static final RenderType RENDER_TYPE = RenderType.entityTranslucent(WHITE_TEXTURE);
+    public static final RenderType RENDER_TYPE = RenderType.entityTranslucentEmissive(WHITE_TEXTURE); ;
+
 
 
     private static int RED = 80;
@@ -36,7 +43,48 @@ public class HolsterRenderer {
     private HolsterRenderer(){
     }
 
-    public static void render(
+
+    public static void renderItem(PoseStack poseStack, MultiBufferSource buffers, int combinedLight, float bodyYaw) {
+        Minecraft minecraft = Minecraft.getInstance();
+
+        if (minecraft.player == null
+                || VisorHolster.holsterManager == null
+                || buffers == null) {
+            return;
+        }
+
+        HolsterState state =
+                VisorHolster.holsterManager.get(minecraft.player.getUUID());
+
+        if (state == null || !state.visible) {
+            return;
+        }
+
+
+        if (!state.slot.getStack().isEmpty()) {
+            poseStack.pushPose();
+
+            poseStack.translate(0.0D, 0.0D, 0.0D);
+
+            poseStack.mulPose(Axis.YP.rotation(-bodyYaw));
+
+            poseStack.scale(0.25f, 0.25f, 0.25f);
+
+            ItemStack stack = state.slot.getStack();
+            ItemRenderer renderer = minecraft.getItemRenderer();
+
+
+
+            renderer.renderStatic(stack, ItemDisplayContext.FIXED, combinedLight, OverlayTexture.NO_OVERLAY,
+                    poseStack, buffers, minecraft.level, 0);
+
+
+            poseStack.popPose();
+        }
+    }
+
+
+    public static void renderHolster(
             PoseStack poseStack,
             MultiBufferSource buffers
     ) {
@@ -51,10 +99,9 @@ public class HolsterRenderer {
         HolsterState state =
                 VisorHolster.holsterManager.get(minecraft.player.getUUID());
 
-        if (state == null || !state.visable) {
+        if (state == null || !state.visible) {
             return;
         }
-        poseStack.pushPose();
 
         VertexConsumer consumer =
                 buffers.getBuffer(RENDER_TYPE);
@@ -67,7 +114,6 @@ public class HolsterRenderer {
                 24
         );
 
-        poseStack.popPose();
     }
 
     private static void renderSphere(

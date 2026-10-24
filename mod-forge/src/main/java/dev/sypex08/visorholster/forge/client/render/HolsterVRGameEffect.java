@@ -110,7 +110,7 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
 
 
         try {
-            HolsterRenderer.render(poseStack, bufferSource);
+            HolsterRenderer.renderHolster(poseStack, bufferSource);
             bufferSource.endBatch(HolsterRenderer.RENDER_TYPE);
 
         } finally {

@@ -7,10 +7,9 @@ public class HolsterInteractionCheck {
 
     public static boolean isTouching(Vec3 handWorldPos, Vec3 orbWorldPos){
 
-        double interactionRadius = 0.225;
+        double interactionRadius = 0.125;
 
         return handWorldPos.closerThan(orbWorldPos, interactionRadius);
-
 
     }
 
