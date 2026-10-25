@@ -15,7 +15,6 @@
       "dev.sypex08.visorholster.fabric.VisorHolster"
     ],
     "client": [
-      "dev.sypex08.visorholster.fabric.client.VisorHolsterFabricClient"
     ]
   },
   "mixins": [

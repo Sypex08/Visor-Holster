@@ -2,7 +2,6 @@ package dev.sypex08.visorholster.core.mixin.common;
 
 import com.mojang.authlib.GameProfile;
 import dev.sypex08.visorholster.core.common.VisorHolster;
-import dev.sypex08.visorholster.core.common.holster.HolsterState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
@@ -23,9 +22,14 @@ public abstract class ServerPlayerMixin extends Player {
     }
 
     @Inject(at = @At("TAIL"), method = "<init>")
-    public void visorholster$init(MinecraftServer server, ServerLevel level, GameProfile gameProfile, ClientInformation clientInformation, CallbackInfo ci){
-        VisorHolster.holsterManager.onPlayerJoin(uuid);
-
+    public void visorholster$init(
+            MinecraftServer server,
+            ServerLevel level,
+            GameProfile gameProfile,
+            ClientInformation clientInformation,
+            CallbackInfo ci
+    ) {
+        VisorHolster.holsterManager.onPlayerJoin(server, gameProfile.getId());
     }
 
     @Inject(at = @At("TAIL"), method = "disconnect")

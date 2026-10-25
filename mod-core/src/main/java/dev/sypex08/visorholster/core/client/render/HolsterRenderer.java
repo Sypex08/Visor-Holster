@@ -6,24 +6,21 @@ import com.mojang.math.Axis;
 import dev.sypex08.visorholster.core.common.VisorHolster;
 import dev.sypex08.visorholster.core.common.holster.HolsterState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 
 
 public class HolsterRenderer {
 
     private static final ResourceLocation WHITE_TEXTURE = ResourceLocation.withDefaultNamespace("textures/misc/white.png");
 
-    public static final RenderType RENDER_TYPE = RenderType.entityTranslucentEmissive(WHITE_TEXTURE); ;
+    public static final RenderType RENDER_TYPE = RenderType.entityTranslucentEmissive(WHITE_TEXTURE);
 
 
 
@@ -72,7 +69,6 @@ public class HolsterRenderer {
 
             ItemStack stack = state.slot.getStack();
             ItemRenderer renderer = minecraft.getItemRenderer();
-
 
 
             renderer.renderStatic(stack, ItemDisplayContext.FIXED, combinedLight, OverlayTexture.NO_OVERLAY,

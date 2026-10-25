@@ -1,5 +1,6 @@
 package dev.sypex08.visorholster.core.server;
 
+import dev.sypex08.visorholster.core.common.network.HolsterChannel;
 import org.vmstudio.visor.api.common.addon.VisorAddon;
 import dev.sypex08.visorholster.core.common.VisorHolster;
 import net.minecraft.network.chat.Component;
@@ -14,6 +15,11 @@ public class HolsterAddonServer implements VisorAddon {
 
         VisorHolster.init();
 
+    }
+
+    @Override
+    public void onAddonRegister() {
+        HolsterChannel.createChannel(this);
     }
 
     @Override

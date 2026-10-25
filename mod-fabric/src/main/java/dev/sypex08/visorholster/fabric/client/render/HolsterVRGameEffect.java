@@ -3,8 +3,8 @@ package dev.sypex08.visorholster.fabric.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.sypex08.visorholster.core.client.render.HolsterRenderer;
 import dev.sypex08.visorholster.core.common.holster.HolsterInteractionCheck;
-import dev.sypex08.visorholster.fabric.network.HolsterInteractionPayload;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import dev.sypex08.visorholster.core.common.network.HolsterChannel;
+import dev.sypex08.visorholster.core.common.network.HolsterInteractionPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -93,7 +93,7 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
 
             if(touching && !wasTouching){
 
-                ClientPlayNetworking.send(new HolsterInteractionPayload(activeHand == HandType.MAIN));
+                HolsterChannel.get().sendToServer(new HolsterInteractionPayload(activeHand == HandType.MAIN));
 
             }
 

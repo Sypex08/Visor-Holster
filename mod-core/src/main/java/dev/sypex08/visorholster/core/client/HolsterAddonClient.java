@@ -1,5 +1,8 @@
 package dev.sypex08.visorholster.core.client;
 
+import dev.sypex08.visorholster.core.common.network.HolsterChannel;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.item.ItemStack;
 import org.vmstudio.visor.api.common.addon.VisorAddon;
 import dev.sypex08.visorholster.core.common.VisorHolster;
 import net.minecraft.network.chat.Component;
@@ -14,6 +17,31 @@ public class HolsterAddonClient implements VisorAddon {
 
         VisorHolster.init();
 
+    }
+
+    @Override
+    public void onAddonRegister() {
+        HolsterChannel.setClientStateHandler(payload -> {
+            Minecraft minecraft = Minecraft.getInstance();
+
+            if (minecraft.player == null
+                    || minecraft.level == null
+                    || VisorHolster.holsterManager == null) {
+                return;
+            }
+
+            ItemStack stack = payload.getItemStack(
+                    minecraft.level.registryAccess()
+            );
+
+            VisorHolster.holsterManager.updateClientState(
+                    minecraft.player.getUUID(),
+                    stack,
+                    payload.visible()
+            );
+        });
+
+        HolsterChannel.createChannel(this);
     }
 
     @Override

@@ -7,9 +7,12 @@
 
   ],
   "server": [
-    "common.ServerPlayerMixin"
+
   ],
   "minVersion": "0.8.4",
   "mixins": [
+    "common.ServerPlayerMixin",
+    "common.LivingEntityMixin"
+
   ]
 }

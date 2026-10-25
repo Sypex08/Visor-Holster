@@ -1,5 +1,6 @@
 package dev.sypex08.visorholster.core.common.holster;
 
+
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -9,7 +10,6 @@ public class HolsterSlot {
     private ItemStack stack = ItemStack.EMPTY;
 
     public boolean isEmpty(){ return stack.isEmpty();}
-    public ItemStack getStack() { return stack;}
 
     public boolean insert(ItemStack from) {
         if (!stack.isEmpty() || from.isEmpty()) return false;
@@ -22,6 +22,14 @@ public class HolsterSlot {
         stack = ItemStack.EMPTY;
         return out;
 
+    }
+
+    public void setStack(ItemStack stack) {
+        this.stack = stack.copy();
+    }
+
+    public ItemStack getStack() {
+        return stack;
     }
 
     public Tag save(HolderLookup.Provider registries){
