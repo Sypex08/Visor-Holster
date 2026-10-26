@@ -3,6 +3,7 @@ package dev.sypex08.visorholster.core.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import dev.sypex08.visorholster.core.client.settings.HolsterClientSettings;
 import dev.sypex08.visorholster.core.common.VisorHolster;
 import dev.sypex08.visorholster.core.common.holster.HolsterState;
 import net.minecraft.client.Minecraft;
@@ -220,7 +221,11 @@ public class HolsterRenderer {
             float v
     ) {
         consumer.addVertex(pose, x, y, z)
-                .setColor(RED, GREEN, BLUE, ALPHA)
+                .setColor(HolsterClientSettings.getRed(),
+                        HolsterClientSettings.getGreen(),
+                        HolsterClientSettings.getBlue(),
+                        HolsterClientSettings.getAlpha()
+                )
                 .setUv(u, v)
                 .setUv1(OverlayTexture.NO_OVERLAY, OverlayTexture.NO_OVERLAY)
                 .setUv2(LightTexture.FULL_BRIGHT, LightTexture.FULL_BRIGHT)

@@ -1,6 +1,7 @@
 package dev.sypex08.visorholster.core.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.sypex08.visorholster.core.client.settings.HolsterClientSettings;
 import dev.sypex08.visorholster.core.common.holster.HolsterInteractionCheck;
 import dev.sypex08.visorholster.core.common.network.HolsterChannel;
 import dev.sypex08.visorholster.core.common.network.HolsterInteractionPayload;
@@ -122,14 +123,16 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
 
         try {
 
-            if (!minecraft.isPaused()){
-
-                HolsterRenderer.renderItem(poseStack,bufferSource, combinedLight, renderPose.getHmd().getYaw());
-                bufferSource.endBatch();
-
-                HolsterRenderer.renderHolster(poseStack, bufferSource);
-                bufferSource.endBatch();
+            if (minecraft.isPaused() && !HolsterClientSettings.isPreview()){
+                return;
             }
+
+            HolsterRenderer.renderItem(poseStack,bufferSource, combinedLight, renderPose.getHmd().getYaw());
+            bufferSource.endBatch();
+
+            HolsterRenderer.renderHolster(poseStack, bufferSource);
+            bufferSource.endBatch();
+
 
 
 

@@ -1,7 +1,10 @@
 package dev.sypex08.visorholster.core.client;
 
+import dev.sypex08.visorholster.core.client.gui.HolsterSettingsScreen;
+import dev.sypex08.visorholster.core.client.settings.HolsterClientSettings;
 import dev.sypex08.visorholster.core.common.network.HolsterChannel;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.ItemStack;
 import org.vmstudio.visor.api.common.addon.VisorAddon;
 import dev.sypex08.visorholster.core.common.VisorHolster;
@@ -16,6 +19,7 @@ public class HolsterAddonClient implements VisorAddon {
     public void onAddonLoad() {
 
         VisorHolster.init();
+        HolsterClientSettings.load();
     }
 
     @Override
@@ -41,6 +45,11 @@ public class HolsterAddonClient implements VisorAddon {
         });
 
         HolsterChannel.createChannel(this);
+    }
+
+    @Override
+    public @Nullable Screen createAddonSettingsScreen(@NotNull Screen backScreen) {
+        return new HolsterSettingsScreen(backScreen);
     }
 
     @Override
