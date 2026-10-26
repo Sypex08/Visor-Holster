@@ -7,7 +7,7 @@ dependencies {
     // @Environment and Mixin
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
 
-    modCompileOnly "maven.modrinth:visor:${visor_version}+mc${minecraft_version}-fabric:api"
+    modCompileOnly "maven.modrinth:visor:${visor_version}+mc${minecraft_version}-fabric"
 }
 
 if (!unobfuscated) {
