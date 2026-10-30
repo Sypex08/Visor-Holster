@@ -28,26 +28,48 @@ public class HolsterSavedData extends SavedData {
         return states.computeIfAbsent(playerId, id -> new HolsterState());
     }
 
-    public static HolsterSavedData load(CompoundTag tag, HolderLookup.Provider registries){
+    public static HolsterSavedData load(CompoundTag tag, HolderLookup.Provider registries) {
         HolsterSavedData data = create();
 
-        ListTag players = tag.getList(PLAYERS, Tag.TAG_COMPOUND);
+        ListTag players = tag.getList(
+                PLAYERS,
+                Tag.TAG_COMPOUND
+        );
 
-        for (int i = 0; i < players.size(); i++){
+        for (int i = 0; i < players.size(); i++) {
             CompoundTag playerTag = players.getCompound(i);
 
-            if (!playerTag.hasUUID("uuid")){
+            if (!playerTag.hasUUID("uuid")) {
                 continue;
             }
 
             UUID uuid = playerTag.getUUID("uuid");
             HolsterState state = new HolsterState();
 
-            if(playerTag.contains("slot", Tag.TAG_COMPOUND)){
-                state.slot.load(registries, playerTag.getCompound("slot"));
+            if (playerTag.contains("slots", Tag.TAG_LIST)) {
+                ListTag slots = playerTag.getList(
+                        "slots",
+                        Tag.TAG_COMPOUND
+                );
+
+                int slotCount = Math.min(
+                        slots.size(),
+                        HolsterState.SLOT_COUNT
+                );
+
+                for (int slot = 0; slot < slotCount; slot++) {
+                    CompoundTag slotTag = slots.getCompound(slot);
+
+                    if (slotTag.contains("stack")) {
+                        state.slots[slot].load(
+                                registries,
+                                slotTag.get("stack")
+                        );
+                    }
+                }
             }
 
-            if (playerTag.contains("visible")){
+            if (playerTag.contains("visible")) {
                 state.visible = playerTag.getBoolean("visible");
             }
 
@@ -65,11 +87,23 @@ public class HolsterSavedData extends SavedData {
 
         ListTag players = new ListTag();
 
-        for (Map.Entry<UUID, HolsterState> entry : states.entrySet()){
+        for (Map.Entry<UUID, HolsterState> entry : states.entrySet()) {
             CompoundTag playerTag = new CompoundTag();
 
             playerTag.putUUID("uuid", entry.getKey());
-            playerTag.put("slot", entry.getValue().slot.save(registries));
+
+            ListTag slots = new ListTag();
+
+            for (int slot = 0; slot < HolsterState.SLOT_COUNT; slot++) {
+                CompoundTag slotTag = new CompoundTag();
+                slotTag.put(
+                        "stack",
+                        entry.getValue().slots[slot].save(registries)
+                );
+                slots.add(slotTag);
+            }
+
+            playerTag.put("slots", slots);
             playerTag.putBoolean("visible", entry.getValue().visible);
 
             players.add(playerTag);

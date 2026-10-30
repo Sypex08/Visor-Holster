@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static dev.sypex08.visorholster.core.common.holster.HolsterState.SLOT_COUNT;
+
 public class HolsterManager {
 
     private final Map<UUID, HolsterState> clientStates = new HashMap<>();
@@ -50,16 +52,21 @@ public class HolsterManager {
         HolsterSavedData data = HolsterSavedData.get(server);
         HolsterState state = data.get(player.getUUID());
 
-        ItemStack stack = state.slot.take();
 
-        if (stack.isEmpty()){
-            return;
+        for (int slot = 0; slot < SLOT_COUNT; slot++) {
+
+            ItemStack stack = state.slots[slot].take();
+
+            if (stack.isEmpty()){
+                continue;
+            }
+
+            player.drop(stack, true);
+
         }
 
-        player.drop(stack, true);
-
         HolsterChannel.get().sendToClient(player,
-                HolsterStatePayload.from(ItemStack.EMPTY, server.registryAccess(), state.visible)
+                HolsterStatePayload.from(state, server.registryAccess())
         );
 
         data.markChanged();
@@ -69,15 +76,27 @@ public class HolsterManager {
         clientStates.remove(playerId);
     }
 
-    public void updateClientState(UUID playerId, ItemStack stack, boolean visible) {
+    public void updateClientState(UUID playerId, ItemStack stack, boolean visible, int holsterSlot) {
+
+        if (holsterSlot < 0
+                || holsterSlot >= SLOT_COUNT) {
+            return;
+        }
+
         HolsterState state = get(playerId);
 
-        state.slot.setStack(stack);
+        state.slots[holsterSlot].setStack(stack);
         state.visible = visible;
     }
 
     @SuppressWarnings("resource")
-    public void interact(ServerPlayer player, boolean mainHand) {
+    public void interact(ServerPlayer player, boolean mainHand, int holsterSlot) {
+
+        if (holsterSlot < 0
+                || holsterSlot >= SLOT_COUNT) {
+            return;
+        }
+
         if (player == null || player.level().isClientSide()) {
             return;
         }
@@ -97,14 +116,14 @@ public class HolsterManager {
 
         ItemStack heldStack = player.getItemInHand(hand);
 
-        if (state.slot.isEmpty()) {
+        if (state.slots[holsterSlot].isEmpty()) {
             if (heldStack.isEmpty()) {
                 return;
             }
 
             ItemStack stackToStore = heldStack.copy();
 
-            if (state.slot.insert(stackToStore)) {
+            if (state.slots[holsterSlot].insert(stackToStore)) {
                 player.setItemInHand(hand, ItemStack.EMPTY);
 
                 data.markChanged();
@@ -114,7 +133,7 @@ public class HolsterManager {
         }
 
         if (heldStack.isEmpty()) {
-            ItemStack stackFromHolster = state.slot.take();
+            ItemStack stackFromHolster = state.slots[holsterSlot].take();
 
             if (!stackFromHolster.isEmpty()) {
                 player.setItemInHand(hand, stackFromHolster);

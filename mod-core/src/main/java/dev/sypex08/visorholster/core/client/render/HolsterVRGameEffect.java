@@ -3,8 +3,11 @@ package dev.sypex08.visorholster.core.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.sypex08.visorholster.core.client.settings.HolsterClientSettings;
 import dev.sypex08.visorholster.core.common.holster.HolsterInteractionCheck;
+import dev.sypex08.visorholster.core.common.holster.HolsterLayout;
 import dev.sypex08.visorholster.core.common.network.HolsterChannel;
 import dev.sypex08.visorholster.core.common.network.HolsterInteractionPayload;
+import dev.sypex08.visorholster.core.common.network.HolsterStatePayload;
+import dev.sypex08.visorholster.core.common.network.HolsterSyncRequestPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -23,11 +26,16 @@ import org.vmstudio.visor.api.common.addon.VisorAddon;
 import org.vmstudio.visor.core.client.render.camera.VRCameraEntitySwap;
 import org.vmstudio.visor.core.client.render.helpers.RenderPoseHelper;
 
+import java.util.UUID;
+
+import static dev.sypex08.visorholster.core.client.render.HolsterPosition.POSITIONS;
+
 
 @RegisterVRGameEffect
 public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.decoration.effects.VRGameEffect{
 
-    private boolean wasTouching;
+    private int wasTouching = -1;
+    private UUID syncedPlayer;
 
     public HolsterVRGameEffect(@NotNull VisorAddon owner) {
         super(owner);
@@ -62,84 +70,72 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
 
         float yaw = renderPose.getBodyYaw();
 
-        double bodyHeight = vrPlayer.getActualHeight() - vrPlayer.getActualHeight() * 0.35;
+        if (minecraft.player != null) {
+            UUID playerId = minecraft.player.getUUID();
 
+            if (!playerId.equals(syncedPlayer)) {
+                HolsterChannel.get().sendToServer(
+                        new HolsterSyncRequestPayload()
+                );
 
-        double forwardX = -Math.sin(yaw);
-        double forwardZ =  Math.cos(yaw);
-
-        double rightX = Math.cos(yaw);
-        double rightZ = Math.sin(yaw);
-
-
-        double sideDistance = 0.0;
-        double forwardDistance = 0.50;
-
-
-        Vec3 orbWorldPosition = InterpolatedPos.add(
-                rightX * sideDistance + forwardX * forwardDistance,
-                bodyHeight,
-                rightZ * sideDistance + forwardZ * forwardDistance
-        );
-
+                syncedPlayer = playerId;
+            }
+        } else {
+            syncedPlayer = null;
+        }
 
         if (vrRenderPass == VRRenderPass.worldUpdater() && !minecraft.isPaused()){
             HandType activeHand = VisorAPI.client().getVRLocalPlayer().getActiveHand();
 
             Vec3 handWorldPosition = renderPose.getHand(activeHand).getPositionVec3();
 
-            boolean touching = HolsterInteractionCheck.isTouching(handWorldPosition,orbWorldPosition);
+            int touchingSlot = HolsterInteractionCheck.getTouching(handWorldPosition,InterpolatedPos, yaw, vrPlayer);
 
 
-            if(touching && !wasTouching){
-
-                HolsterChannel.get().sendToServer(new HolsterInteractionPayload(activeHand == HandType.MAIN));
-
+            if (touchingSlot != -1 && touchingSlot != wasTouching) {
+                HolsterChannel.get().sendToServer(
+                        new HolsterInteractionPayload(
+                                activeHand == HandType.MAIN,
+                                touchingSlot
+                        )
+                );
             }
 
-            wasTouching = touching;
+            wasTouching = touchingSlot;
 
         }
 
-        Vec3 playerRelativePos = orbWorldPosition.subtract(cameraPosition);
+        for (int slot = 0; slot < POSITIONS.size(); slot++){
 
-        poseStack.pushPose();
-        poseStack.setIdentity();
+            Vec3 playerRelativePos = HolsterLayout.calcPlayerRelativePos(vrRenderPass, partialTicks, slot);
 
-        RenderPoseHelper.applyCameraOrientation(vrRenderPass, poseStack);
+            poseStack.pushPose();
+            poseStack.setIdentity();
 
-        poseStack.translate(playerRelativePos.x, playerRelativePos.y, playerRelativePos.z);
+            RenderPoseHelper.applyCameraOrientation(vrRenderPass, poseStack);
 
-        BlockPos orbBlockPos = BlockPos.containing(orbWorldPosition);
+            poseStack.translate(playerRelativePos.x, playerRelativePos.y, playerRelativePos.z);
 
-        int combinedLight = 0;
+            int combinedLight = 0;
 
-        if (minecraft.level != null){
+            try {
 
-            combinedLight = LevelRenderer.getLightColor(minecraft.level,orbBlockPos);
-        }
+                if (minecraft.isPaused() && !HolsterClientSettings.isPreview()){
+                    return;
+                }
+
+                HolsterRenderer.renderItem(poseStack,bufferSource, combinedLight, renderPose.getHmd().getYaw(), slot);
+                bufferSource.endBatch();
+
+                HolsterRenderer.renderHolster(poseStack, bufferSource);
+                bufferSource.endBatch();
 
 
-
-        try {
-
-            if (minecraft.isPaused() && !HolsterClientSettings.isPreview()){
-                return;
+            } finally {
+                poseStack.popPose();
             }
 
-            HolsterRenderer.renderItem(poseStack,bufferSource, combinedLight, renderPose.getHmd().getYaw());
-            bufferSource.endBatch();
-
-            HolsterRenderer.renderHolster(poseStack, bufferSource);
-            bufferSource.endBatch();
-
-
-
-
-        } finally {
-            poseStack.popPose();
         }
-
     }
 
     @Override

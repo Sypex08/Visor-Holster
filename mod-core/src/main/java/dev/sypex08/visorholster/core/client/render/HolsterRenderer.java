@@ -43,7 +43,7 @@ public class HolsterRenderer {
     }
 
 
-    public static void renderItem(PoseStack poseStack, MultiBufferSource buffers, int combinedLight, float bodyYaw) {
+    public static void renderItem(PoseStack poseStack, MultiBufferSource buffers, int combinedLight, float bodyYaw, int holsterSlot) {
         Minecraft minecraft = Minecraft.getInstance();
 
         if (minecraft.player == null
@@ -60,7 +60,7 @@ public class HolsterRenderer {
         }
 
 
-        if (!state.slot.getStack().isEmpty()) {
+        if (!state.slots[holsterSlot].getStack().isEmpty()) {
             poseStack.pushPose();
 
             poseStack.translate(0.0D, 0.0D, 0.0D);
@@ -69,7 +69,7 @@ public class HolsterRenderer {
 
             poseStack.scale(0.25f, 0.25f, 0.25f);
 
-            ItemStack stack = state.slot.getStack();
+            ItemStack stack = state.slots[holsterSlot].getStack();
             ItemRenderer renderer = minecraft.getItemRenderer();
 
 
