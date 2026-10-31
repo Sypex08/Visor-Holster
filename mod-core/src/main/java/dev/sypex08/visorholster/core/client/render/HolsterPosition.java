@@ -9,10 +9,10 @@ public record HolsterPosition(
 ) {
 
     public static final List<HolsterPosition> POSITIONS = List.of(
-            new HolsterPosition(-0.22, 0.45, 0.65),
-            new HolsterPosition( 0.22, 0.45, 0.65),
-            new HolsterPosition(-0.22, 0.68, 0.65),
-            new HolsterPosition( 0.22, 0.68, 0.65)
+            new HolsterPosition(-0.17, 0.33, 0.65),
+            new HolsterPosition( 0.17, 0.33, 0.65),
+            new HolsterPosition(-0.37, 0.18, 0.65),
+            new HolsterPosition( 0.37, 0.18, 0.65)
     );
 
 

@@ -4,7 +4,12 @@ import dev.sypex08.visorholster.core.client.render.HolsterPosition;
 import dev.sypex08.visorholster.core.common.VisorHolster;
 import dev.sypex08.visorholster.core.common.holster.HolsterState;
 import net.minecraft.network.FriendlyByteBuf;
+//? if >=1.21.11 {
+/*import net.minecraft.resources.Identifier;
+*///?} else {
 import net.minecraft.resources.ResourceLocation;
+//?}
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.vmstudio.visor.api.common.addon.VisorAddon;
@@ -19,7 +24,11 @@ import static dev.sypex08.visorholster.core.client.render.HolsterPosition.POSITI
 
 public final class HolsterChannel {
 
+    //? if >=1.21.11 {
+    /*public static final Identifier ID = McVersionUtils.newResourceLoc(VisorHolster.MOD_ID, "channel");
+    *///?} else {
     public static final ResourceLocation ID = McVersionUtils.newResourceLoc(VisorHolster.MOD_ID, "channel");
+    //?}
 
     public static final int NETWORK_VERSION = 3;
 
@@ -41,15 +50,39 @@ public final class HolsterChannel {
                         (payload, sender, responseSender) -> {
 
                             if (payload instanceof HolsterSyncRequestPayload) {
+                                //? if >= 1.21.10{
+
+                                /*if (sender.level().getServer() == null) {
+                                    return;
+                                }
+
+                                *///?} else{
+                                
+
                                 if (sender.getServer() == null) {
                                     return;
                                 }
 
+                                 //?}
+
                                 HolsterState state = VisorHolster.holsterManager.get(sender);
+
+                                //? if >= 1.21.10{
+
+                                /*responseSender.accept(
+                                        HolsterStatePayload.from(state, sender.level().getServer().registryAccess())
+                                );
+
+                                *///?} else{
+                                
 
                                 responseSender.accept(
                                         HolsterStatePayload.from(state, sender.getServer().registryAccess())
                                 );
+
+                                 //?}
+
+
                                 return;
                             }
 
@@ -70,16 +103,44 @@ public final class HolsterChannel {
                             HolsterState state =
                                     VisorHolster.holsterManager.get(sender);
 
-                            if (sender.getServer() == null) {
+                            //? if >= 1.21.10{
+
+                            /*if (sender.level().getServer() == null) {
                                 return;
                             }
 
-                            responseSender.accept(
+                            *///?} else{
+                                
+
+                                if (sender.getServer() == null) {
+                                return;
+                                }
+
+                                 //?}
+
+
+                            //? if >= 1.21.10{
+
+                            /*responseSender.accept(
+                                    HolsterStatePayload.from(
+                                            state,
+                                            sender.level().getServer().registryAccess()
+                                    )
+                            );
+
+                            *///?} else{
+                                
+
+                                responseSender.accept(
                                     HolsterStatePayload.from(
                                             state,
                                             sender.getServer().registryAccess()
                                     )
                             );
+
+                                 //?}
+
+
 
                         }
                 )

@@ -2,11 +2,19 @@ package dev.sypex08.visorholster.core.common.holster;
 
 import dev.sypex08.visorholster.core.common.network.HolsterChannel;
 import dev.sypex08.visorholster.core.common.network.HolsterStatePayload;
+import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+//? if >=26.3 {
+/*import net.minecraft.util.Prediction;
+*///?}
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+//? if >=1.21.11 {
+/*import net.minecraft.world.level.gamerules.GameRules;
+*///?} else {
 import net.minecraft.world.level.GameRules;
+//?}
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +32,16 @@ public class HolsterManager {
 
 
     public HolsterState get(ServerPlayer player) {
+        //? if >= 1.21.10{
+
+        /*MinecraftServer server = player.level().getServer();
+
+        *///?} else{
+        
         MinecraftServer server = player.getServer();
+
+         //?}
+
 
         if (server == null) {
             throw new IllegalStateException("Tried to access data without server");
@@ -39,16 +56,42 @@ public class HolsterManager {
     }
 
     @SuppressWarnings("resource")
-    public void dropOnDeath(ServerPlayer player){
-        if (player == null || player.getServer() == null){
+    public void dropOnDeath(ServerPlayer player) {
+
+        //? if >= 1.21.10{
+
+        /*MinecraftServer server = player.level().getServer();
+
+        if (player == null || server == null) {
             return;
         }
 
-        if (player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)){
+        *///?} else{
+        
+
+        MinecraftServer server =  player.getServer();
+
+        if (player == null || server == null) {
             return;
         }
 
-        MinecraftServer server = player.getServer();
+         //?}
+
+        boolean keepInventory;
+
+        //? if >=1.21.11 {
+        /*keepInventory = player.level().getGameRules().get(GameRules.KEEP_INVENTORY);
+        *///?} elif >=1.21.6 {
+        /*keepInventory = player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
+        *///?} else {
+        keepInventory = player.serverLevel().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
+        //?}
+
+        if (keepInventory) {
+            return;
+        }
+
+
         HolsterSavedData data = HolsterSavedData.get(server);
         HolsterState state = data.get(player.getUUID());
 
@@ -61,7 +104,11 @@ public class HolsterManager {
                 continue;
             }
 
+            //? if >=26.3 {
+            /*player.drop(stack, true, Prediction.PREDICTED);
+            *///?} else {
             player.drop(stack, true);
+            //?}
 
         }
 
@@ -101,7 +148,15 @@ public class HolsterManager {
             return;
         }
 
+        //? if >= 1.21.10{
+
+        /*MinecraftServer server = player.level().getServer();
+
+        *///?} else{
+        
         MinecraftServer server = player.getServer();
+
+         //?}
 
         if (server == null) {
             return;

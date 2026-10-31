@@ -15,6 +15,7 @@ public abstract class LivingEntityMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "dropAllDeathLoot", at = @At("TAIL"))
+    //? if >=1.21.1 {
     private void visorHolster$dropHolsterOnDeath(
             ServerLevel level,
             DamageSource damageSource,
@@ -28,4 +29,18 @@ public abstract class LivingEntityMixin {
             VisorHolster.holsterManager.dropOnDeath(player);
         }
     }
+    //?} else {
+    /*private void visorHolster$dropHolsterOnDeath(
+            DamageSource damageSource,
+            CallbackInfo ci
+    ) {
+        if (!((Object) this instanceof ServerPlayer player)) {
+            return;
+        }
+
+        if (VisorHolster.holsterManager != null) {
+            VisorHolster.holsterManager.dropOnDeath(player);
+        }
+    }
+    *///?}
 }

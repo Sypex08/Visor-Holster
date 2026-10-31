@@ -1,6 +1,7 @@
 package dev.sypex08.visorholster.core.common.holster;
 
 import dev.sypex08.visorholster.core.client.render.HolsterPosition;
+import dev.sypex08.visorholster.core.client.settings.HolsterClientSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3fc;
@@ -32,6 +33,9 @@ public class HolsterLayout {
 
         double bodyHeight = vrPlayer.getActualHeight() - vrPlayer.getActualHeight() * 0.35;
 
+        float customBodyHeight = (float) bodyHeight + (HolsterClientSettings.getHeight() / 100);
+
+
 
         double forwardX = -Math.sin(yaw);
         double forwardZ =  Math.cos(yaw);
@@ -47,7 +51,7 @@ public class HolsterLayout {
 
         Vec3 orbWorldPosition = InterpolatedPos.add(
                 rightX * sideDistance + forwardX * forwardDistance,
-                bodyHeight,
+                customBodyHeight,
                 rightZ * sideDistance + forwardZ * forwardDistance
         );
 

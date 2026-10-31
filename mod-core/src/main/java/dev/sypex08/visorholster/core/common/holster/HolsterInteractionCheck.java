@@ -1,6 +1,7 @@
 package dev.sypex08.visorholster.core.common.holster;
 
 import dev.sypex08.visorholster.core.client.render.HolsterPosition;
+import dev.sypex08.visorholster.core.client.settings.HolsterClientSettings;
 import net.minecraft.world.phys.Vec3;
 import org.vmstudio.visor.api.client.player.VRLocalPlayer;
 
@@ -22,7 +23,8 @@ public class HolsterInteractionCheck {
 
         double interactionRadius = 0.125;
 
-        double bodyHeight = vrPlayer.getActualHeight() - vrPlayer.getActualHeight() * 0.35;
+        double bodyHeight = vrPlayer.getActualHeight() - vrPlayer.getActualHeight() * 0.35 ;
+        float customBodyHeight = (float)bodyHeight + + (HolsterClientSettings.getHeight() / 100);
 
         for (int slot = 0; slot < POSITIONS.size(); slot++) {
             HolsterPosition position = POSITIONS.get(slot);
@@ -30,7 +32,7 @@ public class HolsterInteractionCheck {
             Vec3 orbWorldPosition = interpolatedPos.add(
                     rightX * position.sideDistance()
                             + forwardX * position.forwardDistance(),
-                    bodyHeight,
+                    customBodyHeight,
                     rightZ * position.sideDistance()
                             + forwardZ * position.forwardDistance()
             );

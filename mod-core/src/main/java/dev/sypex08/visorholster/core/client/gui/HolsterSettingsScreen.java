@@ -25,6 +25,12 @@ public class HolsterSettingsScreen extends Screen {
         int top = Math.max(20, this.height / 2 - 90);
 
         addRenderableWidget(new IntSlider(
+                left, top -rowHeight, widgetWidth, 20,
+                -100, 100, (int) HolsterClientSettings.getHeight(),
+                "Height: ", HolsterClientSettings::setHeight
+        ));
+
+        addRenderableWidget(new IntSlider(
                 left, top, widgetWidth, 20,
                 0, 255, HolsterClientSettings.getRed(),
                 "R: ", HolsterClientSettings::setRed

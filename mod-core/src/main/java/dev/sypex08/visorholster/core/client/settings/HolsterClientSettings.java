@@ -25,6 +25,11 @@ public final class HolsterClientSettings {
 
     private static int distance = 80;
 
+    private static float height = 0;
+    private static final int maxHeight = 100;
+    private static final int minHeight = -100;
+
+
     private static int red = DEFAULT_RED;
     private static int green = DEFAULT_GREEN;
     private static int blue = DEFAULT_BLUE;
@@ -62,6 +67,8 @@ public final class HolsterClientSettings {
             setPreview(getBoolean(json, "preview", false));
             setEnabled(getBoolean(json, "enabled", true));
 
+            setHeight(getInt(json,"height", 0));
+
         } catch (IOException | RuntimeException exception) {
             System.err.println("[VisorHolster] Could not load client settings");
             exception.printStackTrace();
@@ -79,6 +86,7 @@ public final class HolsterClientSettings {
         json.addProperty("distance", distance);
         json.addProperty("preview", preview);
         json.addProperty("enabled", enabled);
+        json.addProperty("height", height);
 
         try {
             Files.createDirectories(path.getParent());
@@ -137,6 +145,12 @@ public final class HolsterClientSettings {
     public static void setDistance(int value) {
         distance = value;
     }
+
+    public static void setHeight(int value){
+        height = value;
+    }
+
+    public static float getHeight(){return height;}
 
     public static boolean isPreview(){
         return preview;

@@ -3,6 +3,7 @@ package dev.sypex08.visorholster.core.common.network;
 import dev.sypex08.visorholster.core.common.holster.HolsterState;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import org.vmstudio.visor.api.common.network.VisorPayloadToClient;
@@ -21,9 +22,17 @@ public record HolsterStatePayload(List<Optional<CompoundTag>> stackTags, boolean
         for (int slot = 0; slot < HolsterState.SLOT_COUNT; slot++) {
             ItemStack stack = state.slots[slot].getStack();
 
+            //? if >=1.20.5 {
             stackTags.add(
-                    stack.isEmpty() ? Optional.empty() : Optional.of((CompoundTag) stack.save(registries))
+                    stack.isEmpty() ? Optional.empty() : Optional.of((CompoundTag) stack.OPTIONAL_CODEC
+                            .encodeStart(registries.createSerializationContext(NbtOps.INSTANCE), stack)
+                            .getOrThrow())
             );
+            //?} else {
+            /*stackTags.add(
+                    stack.isEmpty() ? Optional.empty() : Optional.of(stack.save(new CompoundTag()))
+            );
+            *///?}
         }
 
         return new HolsterStatePayload(
@@ -79,7 +88,14 @@ public record HolsterStatePayload(List<Optional<CompoundTag>> stackTags, boolean
     }
 
     public ItemStack getItemStack(HolderLookup.Provider registries, int slot) {
-        return stackTags.get(slot).map(tag -> ItemStack.parseOptional(registries, tag))
+        //? if >=1.20.5 {
+        return stackTags.get(slot).flatMap(tag -> ItemStack.OPTIONAL_CODEC
+                        .parse(registries.createSerializationContext(NbtOps.INSTANCE), tag)
+                        .result()).orElse(ItemStack.EMPTY);
+        //?} else {
+        
+        /*return stackTags.get(slot).map(ItemStack::of)
                 .orElse(ItemStack.EMPTY);
+        *///?}
     }
 }
