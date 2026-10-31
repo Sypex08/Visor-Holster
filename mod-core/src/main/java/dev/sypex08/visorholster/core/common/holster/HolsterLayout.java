@@ -2,7 +2,6 @@ package dev.sypex08.visorholster.core.common.holster;
 
 import dev.sypex08.visorholster.core.client.render.HolsterPosition;
 import dev.sypex08.visorholster.core.client.settings.HolsterClientSettings;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3fc;
 import org.vmstudio.visor.api.VisorAPI;
@@ -17,7 +16,12 @@ import static dev.sypex08.visorholster.core.client.render.HolsterPosition.POSITI
 
 public class HolsterLayout {
 
-    public static Vec3 calcPlayerRelativePos(VRRenderPass vrRenderPass, float partialTicks, int holsterSlot){
+    public static Vec3 calcPlayerRelativePos(
+            VRRenderPass vrRenderPass,
+            float partialTicks,
+            int holsterSlot,
+            float holsterYaw
+    ){
 
         VRPlayerPoseClient renderPose = VisorAPI.client().getVRLocalPlayer().getPoseData(PlayerPoseType.RENDER);
 
@@ -29,19 +33,17 @@ public class HolsterLayout {
 
         VRLocalPlayer vrPlayer = VisorAPI.client().getVRLocalPlayer();
 
-        float yaw = renderPose.getBodyYaw();
-
         double bodyHeight = vrPlayer.getActualHeight() - vrPlayer.getActualHeight() * 0.35;
 
         float customBodyHeight = (float) bodyHeight + (HolsterClientSettings.getHeight() / 100);
 
 
 
-        double forwardX = -Math.sin(yaw);
-        double forwardZ =  Math.cos(yaw);
+        double forwardX = -Math.sin(holsterYaw);
+        double forwardZ =  Math.cos(holsterYaw);
 
-        double rightX = Math.cos(yaw);
-        double rightZ = Math.sin(yaw);
+        double rightX = Math.cos(holsterYaw);
+        double rightZ = Math.sin(holsterYaw);
 
         HolsterPosition holsterPosition = POSITIONS.get(holsterSlot);
 
@@ -55,9 +57,9 @@ public class HolsterLayout {
                 rightZ * sideDistance + forwardZ * forwardDistance
         );
 
-        Vec3 playerRelativePos = orbWorldPosition.subtract(cameraPosition);
 
-        return playerRelativePos;
+
+        return orbWorldPosition.subtract(cameraPosition);
 
     }
 
