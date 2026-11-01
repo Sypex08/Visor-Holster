@@ -48,7 +48,7 @@ jobs:
               game_version="${BASH_REMATCH[1]}"
               loader="${BASH_REMATCH[2]}"
               loader="${loader^}"
-              cp -- "$jar" "release-assets/${loader}-${game_version}.jar"
+              cp -- "$jar" "release-assets/VisorHolster-${loader}-${game_version}.jar"
             else
               echo "Unexpected JAR filename: $filename"
               exit 1
@@ -69,4 +69,5 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: release-assets/*.jar
+
 
