@@ -2,5 +2,8 @@
   "visor_holster.settings.title": "VisorHolster Settings",
   "visor_holster.settings.preview_on": "Preview: On",
   "visor_holster.settings.preview_off": "Preview: Off",
-  "visor_holster.settings.reset_colors": "Reset Colors"
+  "visor_holster.settings.reset_colors": "Reset Colors",
+  "visor_holster.settings.edit_mode_on": "Edit Mode: On (hold Right Click)",
+  "visor_holster.settings.edit_mode_off": "Edit Mode: Off",
+  "visor_holster.settings.reset_positions": "Reset Holster Positions"
 }

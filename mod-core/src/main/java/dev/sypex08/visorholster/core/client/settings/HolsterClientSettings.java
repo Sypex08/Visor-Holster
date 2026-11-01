@@ -1,6 +1,7 @@
 package dev.sypex08.visorholster.core.client.settings;
 
 import com.google.gson.*;
+import dev.sypex08.visorholster.core.client.render.HolsterPosition;
 import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
@@ -36,6 +37,7 @@ public final class HolsterClientSettings {
     private static int alpha = DEFAULT_ALPHA;
 
     private static boolean preview = false;
+    private static boolean editMode = false;
 
     private HolsterClientSettings(){
     }
@@ -67,7 +69,9 @@ public final class HolsterClientSettings {
             setPreview(getBoolean(json, "preview", false));
             setEnabled(getBoolean(json, "enabled", true));
 
-            setHeight(getInt(json,"height", 0));
+            setHeight(getInt(json, "height", 0));
+            resetHolsterPositions();
+            loadHolsterPositions(json);
 
         } catch (IOException | RuntimeException exception) {
             System.err.println("[VisorHolster] Could not load client settings");
@@ -87,6 +91,15 @@ public final class HolsterClientSettings {
         json.addProperty("preview", preview);
         json.addProperty("enabled", enabled);
         json.addProperty("height", height);
+        JsonArray positionArray = new JsonArray();
+        for (HolsterPosition position : holsterPositions) {
+            JsonObject positionJson = new JsonObject();
+            positionJson.addProperty("sideDistance", position.sideDistance());
+            positionJson.addProperty("forwardDistance", position.forwardDistance());
+            positionJson.addProperty("height", position.height());
+            positionArray.add(positionJson);
+        }
+        json.add("holsterPositions", positionArray);
 
         try {
             Files.createDirectories(path.getParent());
@@ -128,6 +141,82 @@ public final class HolsterClientSettings {
         return value != null && value.isJsonPrimitive()
                 ? value.getAsBoolean()
                 : fallback;
+    }
+
+    private static double getDouble(JsonObject json, String key, double fallback) {
+        JsonElement value = json.get(key);
+        if (value == null || !value.isJsonPrimitive()) {
+            return fallback;
+        }
+        try {
+            double parsed = value.getAsDouble();
+            return Double.isFinite(parsed) ? parsed : fallback;
+        } catch (RuntimeException exception) {
+            return fallback;
+        }
+    }
+
+    private static void loadHolsterPositions(JsonObject json) {
+        JsonElement value = json.get("holsterPositions");
+        if (value == null || !value.isJsonArray()) {
+            return;
+        }
+
+        JsonArray positionArray = value.getAsJsonArray();
+        int count = Math.min(positionArray.size(), holsterPositions.length);
+        for (int slot = 0; slot < count; slot++) {
+            JsonElement element = positionArray.get(slot);
+            if (!element.isJsonObject()) {
+                continue;
+            }
+            JsonObject positionJson = element.getAsJsonObject();
+            HolsterPosition fallback = DEFAULT_HOLSTER_POSITIONS[slot];
+            holsterPositions[slot] = new HolsterPosition(
+                    getDouble(positionJson, "sideDistance", fallback.sideDistance()),
+                    getDouble(positionJson, "forwardDistance", fallback.forwardDistance()),
+                    getDouble(positionJson, "height", fallback.height())
+            );
+        }
+    }
+
+    private static final HolsterPosition[] DEFAULT_HOLSTER_POSITIONS = {
+            new HolsterPosition(-0.17, 0.33, 0.65),
+            new HolsterPosition( 0.17, 0.33, 0.65),
+            new HolsterPosition(-0.37, 0.18, 0.65),
+            new HolsterPosition( 0.37, 0.18, 0.65)
+    };
+
+    private static final HolsterPosition[] holsterPositions =
+            DEFAULT_HOLSTER_POSITIONS.clone();
+
+    public static int getHolsterPositionCount() {
+        return holsterPositions.length;
+    }
+
+    public static HolsterPosition getHolsterPosition(int slot) {
+        return holsterPositions[slot];
+    }
+
+    public static void setHolsterPosition(int slot, HolsterPosition position) {
+        holsterPositions[slot] = position;
+    }
+
+    public static void resetHolsterPositions() {
+        System.arraycopy(
+                DEFAULT_HOLSTER_POSITIONS, 0,
+                holsterPositions, 0,
+                holsterPositions.length
+        );
+    }
+
+
+
+    public static boolean isEditMode() {
+        return editMode;
+    }
+
+    public static void setEditMode(boolean value) {
+        editMode = value;
     }
 
     public static boolean isEnabled(){

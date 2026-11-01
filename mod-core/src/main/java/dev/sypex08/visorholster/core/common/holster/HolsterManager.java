@@ -2,12 +2,13 @@ package dev.sypex08.visorholster.core.common.holster;
 
 import dev.sypex08.visorholster.core.common.network.HolsterChannel;
 import dev.sypex08.visorholster.core.common.network.HolsterStatePayload;
-import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 //? if >=26.3 {
 /*import net.minecraft.util.Prediction;
 *///?}
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 //? if >=1.21.11 {
@@ -194,6 +195,18 @@ public class HolsterManager {
                 player.setItemInHand(hand, stackFromHolster);
 
                 data.markChanged();
+
+                player.level().playSound(
+                        null,
+                        player.getX(),
+                        player.getY(),
+                        player.getZ(),
+                        SoundEvents.HORSE_SADDLE,
+                        SoundSource.PLAYERS,
+                        0.6F,
+                        1.8F
+                );
+
             }
         }
     }

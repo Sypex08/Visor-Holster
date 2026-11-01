@@ -1,6 +1,7 @@
 package dev.sypex08.visorholster.core.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.sypex08.visorholster.core.client.input.HolsterEditController;
 import dev.sypex08.visorholster.core.client.settings.HolsterClientSettings;
 import dev.sypex08.visorholster.core.common.holster.HolsterInteractionCheck;
 import dev.sypex08.visorholster.core.common.holster.HolsterLayout;
@@ -8,7 +9,19 @@ import dev.sypex08.visorholster.core.common.network.HolsterChannel;
 import dev.sypex08.visorholster.core.common.network.HolsterInteractionPayload;
 import dev.sypex08.visorholster.core.common.network.HolsterSyncRequestPayload;
 import net.minecraft.client.Minecraft;
+
+
+//? if >=26.1.2{
+
+/*import org.vmstudio.visor.api.compatibility.mcversion.render.McRenderUtils;
+
+*///?} else{
+
+
 import net.minecraft.client.renderer.LevelRenderer;
+
+//?}
+
 //? if <1.21.9 {
 import net.minecraft.client.renderer.MultiBufferSource;
 //?}
@@ -22,6 +35,7 @@ import org.vmstudio.visor.api.client.player.pose.VRPlayerPoseClient;
 import org.vmstudio.visor.api.client.render.VRRenderPass;
 import org.vmstudio.visor.api.client.render.decoration.VRDecorator;
 import org.vmstudio.visor.api.client.render.decoration.annotations.RegisterVRGameEffect;
+import org.vmstudio.visor.api.compatibility.mcversion.McVersionClientUtils;
 import org.vmstudio.visor.api.common.HandType;
 import org.vmstudio.visor.api.common.addon.VisorAddon;
 //? if >=1.21.9 {
@@ -32,8 +46,6 @@ import org.vmstudio.visor.core.client.render.helpers.RenderPoseHelper;
 
 import java.util.UUID;
 
-import static dev.sypex08.visorholster.core.client.render.HolsterPosition.POSITIONS;
-
 
 @RegisterVRGameEffect
 public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.decoration.effects.VRGameEffect{
@@ -43,7 +55,9 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
     private static final float LOOK_DOWN_YAW_DEAD_ZONE = (float) Math.toRadians(30.0);
 
     private final int[] wasTouching = {-1, -1};
+    private final HolsterEditController editController = new HolsterEditController();
     private UUID syncedPlayer;
+    private Object syncedLevel;
     private float holsterYaw;
     private boolean holsterYawInitialized;
     private boolean lookingDown;
@@ -70,6 +84,11 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
         Minecraft minecraft = Minecraft.getInstance();
 
         if (minecraft.level == null) {
+            syncedPlayer = null;
+            syncedLevel = null;
+            wasTouching[0] = -1;
+            wasTouching[1] = -1;
+            editController.cancelAndSave();
             return;
         }
 
@@ -91,17 +110,25 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
         if (minecraft.player != null) {
             UUID playerId = minecraft.player.getUUID();
 
-            if (!playerId.equals(syncedPlayer)) {
+            if (!playerId.equals(syncedPlayer) || minecraft.level != syncedLevel) {
                 HolsterChannel.get().sendToServer(
                         new HolsterSyncRequestPayload()
                 );
 
                 syncedPlayer = playerId;
+                syncedLevel = minecraft.level;
+                wasTouching[0] = -1;
+                wasTouching[1] = -1;
+                editController.cancelAndSave();
                 holsterYawInitialized = false;
                 lookingDown = false;
             }
         } else {
             syncedPlayer = null;
+            syncedLevel = null;
+            wasTouching[0] = -1;
+            wasTouching[1] = -1;
+            editController.cancelAndSave();
             holsterYawInitialized = false;
             lookingDown = false;
         }
@@ -110,7 +137,17 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
         float headPitch = renderPose.getHmd().getPitch();
         holsterYaw = updateHolsterYaw(headYaw, headPitch);
 
-        if (vrRenderPass == VRRenderPass.worldUpdater() && !minecraft.isPaused()) {
+        if (vrRenderPass == VRRenderPass.worldUpdater()) {
+            boolean screenOpen = McVersionClientUtils.screen() != null;
+            editController.update(
+                    renderPose,
+                    InterpolatedPos,
+                    holsterYaw,
+                    vrPlayer,
+                    minecraft.isPaused(),
+                    screenOpen
+            );
+
             for (HandType hand : HandType.values()) {
                 Vec3 handWorldPosition =
                         renderPose.getHand(hand).getPositionVec3();
@@ -123,10 +160,13 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
                 );
 
                 int handIndex = hand.ordinal();
+                boolean canInteract = !HolsterClientSettings.isEditMode()
+                        && !minecraft.isPaused()
+                        && !screenOpen;
 
-                if (touchingSlot != -1
+                if (canInteract
+                        && touchingSlot != -1
                         && touchingSlot != wasTouching[handIndex]) {
-
                     HolsterChannel.get().sendToServer(
                             new HolsterInteractionPayload(
                                     hand == HandType.MAIN,
@@ -139,7 +179,7 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
             }
         }
 
-        for (int slot = 0; slot < POSITIONS.size(); slot++){
+        for (int slot = 0; slot < HolsterClientSettings.getHolsterPositionCount(); slot++){
 
             Vec3 playerRelativePos = HolsterLayout.calcPlayerRelativePos(
                     vrRenderPass,
@@ -157,10 +197,24 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
 
             Vec3 orbWorldPosition = cameraPosition.add(playerRelativePos);
 
-            int combinedLight = LevelRenderer.getLightColor(
+            //? >= 26.1.2{
+
+            /*int combinedLight = McRenderUtils.packedLight(
                     minecraft.level,
                     BlockPos.containing(orbWorldPosition)
             );
+
+
+            *///?} else {
+            
+
+            int combinedLight =  LevelRenderer.getLightColor(
+                    minecraft.level,
+                    BlockPos.containing(orbWorldPosition)
+            );
+
+             //?}
+
 
             try {
 
@@ -212,8 +266,6 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
         }
 
         if (lookingDownNow && !lookingDown) {
-            // Capture the current orientation when the player starts looking down.
-            // Head turns inside the dead zone then leave the holsters in place.
             lookDownHeadYaw = headYaw;
             lookDownHolsterYaw = holsterYaw;
         }
@@ -229,7 +281,6 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
                 targetYaw += Math.copySign(turnBeyondDeadZone, headTurn);
             }
         } else {
-            // Outside the look-down posture, keep the holsters following the head normally.
             targetYaw = headYaw;
         }
 

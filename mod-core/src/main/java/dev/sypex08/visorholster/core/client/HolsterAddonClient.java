@@ -1,21 +1,19 @@
 package dev.sypex08.visorholster.core.client;
 
 import dev.sypex08.visorholster.core.client.gui.HolsterSettingsScreen;
-import dev.sypex08.visorholster.core.client.render.HolsterPosition;
+import dev.sypex08.visorholster.core.client.input.HolsterEditInputListener;
 import dev.sypex08.visorholster.core.client.settings.HolsterClientSettings;
 import dev.sypex08.visorholster.core.common.holster.HolsterState;
 import dev.sypex08.visorholster.core.common.network.HolsterChannel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
+import org.vmstudio.visor.api.VisorAPI;
 import org.vmstudio.visor.api.common.addon.VisorAddon;
 import dev.sypex08.visorholster.core.common.VisorHolster;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import static dev.sypex08.visorholster.core.client.render.HolsterPosition.POSITIONS;
 
 
 public class HolsterAddonClient implements VisorAddon {
@@ -29,6 +27,11 @@ public class HolsterAddonClient implements VisorAddon {
 
     @Override
     public void onAddonRegister() {
+
+        VisorAPI.eventBus().registerListener(
+                this,
+                new HolsterEditInputListener()
+        );
 
         HolsterChannel.setClientStateHandler(payload -> {
             Minecraft minecraft = Minecraft.getInstance();

@@ -1,6 +1,6 @@
 package dev.sypex08.visorholster.core.common.network;
 
-import dev.sypex08.visorholster.core.client.render.HolsterPosition;
+
 import dev.sypex08.visorholster.core.common.VisorHolster;
 import dev.sypex08.visorholster.core.common.holster.HolsterState;
 import net.minecraft.network.FriendlyByteBuf;
@@ -9,8 +9,7 @@ import net.minecraft.network.FriendlyByteBuf;
 *///?} else {
 import net.minecraft.resources.ResourceLocation;
 //?}
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.phys.Vec3;
+
 import org.jetbrains.annotations.NotNull;
 import org.vmstudio.visor.api.common.addon.VisorAddon;
 import org.vmstudio.visor.api.common.network.VisorChannel;
@@ -20,7 +19,7 @@ import org.vmstudio.visor.api.compatibility.mcversion.McVersionUtils;
 
 import java.util.function.Consumer;
 
-import static dev.sypex08.visorholster.core.client.render.HolsterPosition.POSITIONS;
+
 
 public final class HolsterChannel {
 

@@ -76,6 +76,36 @@ public class HolsterSettingsScreen extends Screen {
                 )
                 .bounds(left, top + rowHeight * 5 + 16, widgetWidth, 20)
                 .build());
+
+        addRenderableWidget(Button.builder(
+                        editModeMessage(),
+                        button -> {
+                            HolsterClientSettings.setEditMode(
+                                    !HolsterClientSettings.isEditMode()
+                            );
+                            button.setMessage(editModeMessage());
+                        }
+                )
+                .bounds(left, top + rowHeight * 6 + 16, widgetWidth, 20)
+                .build());
+
+        addRenderableWidget(Button.builder(
+                        Component.translatable("visor_holster.settings.reset_positions"),
+                        button -> {
+                            HolsterClientSettings.resetHolsterPositions();
+                            HolsterClientSettings.save();
+                        }
+                )
+                .bounds(left, top + rowHeight * 7 + 16, widgetWidth, 20)
+                .build());
+    }
+
+    private static Component editModeMessage() {
+        return Component.translatable(
+                HolsterClientSettings.isEditMode()
+                        ? "visor_holster.settings.edit_mode_on"
+                        : "visor_holster.settings.edit_mode_off"
+        );
     }
 
     private static Component previewMessage() {
