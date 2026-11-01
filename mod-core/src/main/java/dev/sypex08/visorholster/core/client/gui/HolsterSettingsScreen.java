@@ -98,6 +98,18 @@ public class HolsterSettingsScreen extends Screen {
                 )
                 .bounds(left, top + rowHeight * 7 + 16, widgetWidth, 20)
                 .build());
+
+        addRenderableWidget(Button.builder(
+                    enabledMessage(),
+                    button -> {
+                        HolsterClientSettings.setEnabled(
+                                !HolsterClientSettings.isEnabled()
+                        );
+                        button.setMessage(enabledMessage());
+                    }
+        )
+                        .bounds(left, top - (rowHeight * 2), widgetWidth, 20)
+                        .build());
     }
 
     private static Component editModeMessage() {
@@ -105,6 +117,14 @@ public class HolsterSettingsScreen extends Screen {
                 HolsterClientSettings.isEditMode()
                         ? "visor_holster.settings.edit_mode_on"
                         : "visor_holster.settings.edit_mode_off"
+        );
+    }
+
+    private static Component enabledMessage(){
+        return Component.translatable(
+                HolsterClientSettings.isEnabled()
+                ? "visor_holster.settings.enabled"
+                : "visor_holster.settings.disabled"
         );
     }
 

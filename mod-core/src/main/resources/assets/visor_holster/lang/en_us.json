@@ -5,5 +5,7 @@
   "visor_holster.settings.reset_colors": "Reset Colors",
   "visor_holster.settings.edit_mode_on": "Edit Mode: On (hold Right Click)",
   "visor_holster.settings.edit_mode_off": "Edit Mode: Off",
-  "visor_holster.settings.reset_positions": "Reset Holster Positions"
+  "visor_holster.settings.reset_positions": "Reset Holster Positions",
+  "visor_holster.settings.enabled": "Holster: Enabled",
+  "visor_holster.settings.disabled": "Holster: Disabled"
 }

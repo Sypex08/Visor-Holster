@@ -81,6 +81,10 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
     @Override
     public void render(@NotNull VRRenderPass vrRenderPass, @NotNull PoseStack poseStack, float partialTicks) {
 
+        if (!HolsterClientSettings.isEnabled()){
+            return;
+        }
+
         Minecraft minecraft = Minecraft.getInstance();
 
         if (minecraft.level == null) {

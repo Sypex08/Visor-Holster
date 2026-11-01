@@ -1,5 +1,6 @@
 package dev.sypex08.visorholster.core.common.holster;
 
+import dev.sypex08.visorholster.core.client.settings.HolsterClientSettings;
 import dev.sypex08.visorholster.core.common.network.HolsterChannel;
 import dev.sypex08.visorholster.core.common.network.HolsterStatePayload;
 import net.minecraft.server.MinecraftServer;
@@ -139,6 +140,10 @@ public class HolsterManager {
 
     @SuppressWarnings("resource")
     public void interact(ServerPlayer player, boolean mainHand, int holsterSlot) {
+
+        if (!HolsterClientSettings.isEnabled()){
+            return;
+        }
 
         if (holsterSlot < 0
                 || holsterSlot >= SLOT_COUNT) {
