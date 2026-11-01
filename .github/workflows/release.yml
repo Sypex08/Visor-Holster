@@ -25,6 +25,9 @@ jobs:
           java-version: "25"
           cache: gradle
 
+      - name: Make Gradle wrapper executable
+        run: chmod +x gradlew
+
       - name: Build all configured Minecraft versions and loaders
         run: ./gradlew --no-daemon buildAll --stacktrace
 
@@ -66,3 +69,4 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: release-assets/*.jar
+
