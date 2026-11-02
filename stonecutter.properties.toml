@@ -9,8 +9,8 @@ mod_description = "Holsters for Visor"
 mod_license = "MIT"
 
 visor_version = "0.6.0"
-visor_version_range_fabric = ">=0.6.0"
-visor_version_range_forgelike = "[0.6.0,)"
+visor_version_range_fabric = ">=0.6.0-alpha.2"
+visor_version_range_forgelike = "[0.6.0-alpha.2,)"
 
 [targets]
 "1.20.1" = ["fabric", "forge"]
