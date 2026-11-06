@@ -30,6 +30,21 @@ public class HolsterSettingsScreen extends Screen {
                 "Height: ", HolsterClientSettings::setHeight
         ));
 
+        addRenderableWidget(Button.builder(
+                        holsterAmountMessage(),
+                        button -> {
+                            if (HolsterClientSettings.getHolsterCount() < 4){
+                                HolsterClientSettings.setHolsterCount(HolsterClientSettings.getHolsterCount() + 1);
+                            }
+                            else if(HolsterClientSettings.getHolsterCount() == 4){
+                                HolsterClientSettings.setHolsterCount(1);
+                            }
+                            button.setMessage(holsterAmountMessage());
+                        }
+                )
+                .bounds(left, top - (rowHeight * 2), widgetWidth, 20)
+                .build());
+
         addRenderableWidget(new IntSlider(
                 left, top, widgetWidth, 20,
                 0, 255, HolsterClientSettings.getRed(),
@@ -108,7 +123,7 @@ public class HolsterSettingsScreen extends Screen {
                         button.setMessage(enabledMessage());
                     }
         )
-                        .bounds(left, top - (rowHeight * 2), widgetWidth, 20)
+                        .bounds(left, top - (rowHeight * 3), widgetWidth, 20)
                         .build());
     }
 
@@ -126,6 +141,27 @@ public class HolsterSettingsScreen extends Screen {
                 ? "visor_holster.settings.enabled"
                 : "visor_holster.settings.disabled"
         );
+    }
+
+    private static Component holsterAmountMessage(){
+
+            switch (HolsterClientSettings.getHolsterCount()){
+                case 1:
+                    return Component.translatable("visor_holster.settings.holsteramount-1");
+
+                case 2:
+                    return Component.translatable("visor_holster.settings.holsteramount-2");
+
+                case 3:
+                    return Component.translatable("visor_holster.settings.holsteramount-3");
+
+                case 4:
+                    return Component.translatable("visor_holster.settings.holsteramount-4");
+
+            }
+
+            return null;
+
     }
 
     private static Component previewMessage() {

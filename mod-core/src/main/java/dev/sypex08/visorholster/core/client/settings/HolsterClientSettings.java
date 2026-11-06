@@ -30,6 +30,8 @@ public final class HolsterClientSettings {
     private static final int maxHeight = 100;
     private static final int minHeight = -100;
 
+    private static int holsterCount = 4;
+
 
     private static int red = DEFAULT_RED;
     private static int green = DEFAULT_GREEN;
@@ -188,6 +190,15 @@ public final class HolsterClientSettings {
 
     private static final HolsterPosition[] holsterPositions =
             DEFAULT_HOLSTER_POSITIONS.clone();
+
+
+    public static int getHolsterCount() {
+        return holsterCount;
+    }
+
+    public static void setHolsterCount(int value){
+        holsterCount = value;
+    }
 
     public static int getHolsterPositionCount() {
         return holsterPositions.length;

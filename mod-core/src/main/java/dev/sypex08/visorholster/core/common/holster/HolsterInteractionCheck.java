@@ -37,7 +37,7 @@ public class HolsterInteractionCheck {
         double closestDistanceSquared = radius * radius;
         int closestSlot = -1;
 
-        for (int slot = 0; slot < HolsterClientSettings.getHolsterPositionCount(); slot++) {
+        for (int slot = 0; slot < HolsterClientSettings.getHolsterCount(); slot++) {
             Vec3 holsterWorldPos = HolsterLayout.calcWorldPosition(
                     slot,
                     bodyOrigin,

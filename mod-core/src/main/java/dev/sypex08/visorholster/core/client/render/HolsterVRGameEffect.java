@@ -183,7 +183,7 @@ public class HolsterVRGameEffect extends org.vmstudio.visor.api.client.render.de
             }
         }
 
-        for (int slot = 0; slot < HolsterClientSettings.getHolsterPositionCount(); slot++){
+        for (int slot = 0; slot < HolsterClientSettings.getHolsterCount(); slot++){
 
             Vec3 playerRelativePos = HolsterLayout.calcPlayerRelativePos(
                     vrRenderPass,

@@ -114,11 +114,16 @@ public class HolsterManager {
 
         }
 
-        HolsterChannel.get().sendToClient(player,
-                HolsterStatePayload.from(state, server.registryAccess())
-        );
-
         data.markChanged();
+
+        try {
+            HolsterChannel.get().sendToClient(
+                    player,
+                    HolsterStatePayload.from(state, server.registryAccess())
+            );
+        } catch (UnsupportedOperationException ignored) {
+        }
+
     }
 
     public void onPlayerLeave(UUID playerId) {

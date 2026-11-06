@@ -7,5 +7,13 @@
   "visor_holster.settings.edit_mode_off": "Edit Mode: Off",
   "visor_holster.settings.reset_positions": "Reset Holster Positions",
   "visor_holster.settings.enabled": "Holster: Enabled",
-  "visor_holster.settings.disabled": "Holster: Disabled"
+  "visor_holster.settings.disabled": "Holster: Disabled",
+  "visor_holster.settings.holsteramount-1": "Holster amount: 1",
+  "visor_holster.settings.holsteramount-2": "Holster amount: 2",
+  "visor_holster.settings.holsteramount-3": "Holster amount: 3",
+  "visor_holster.settings.holsteramount-4": "Holster amount: 4"
+
+
+
+
 }

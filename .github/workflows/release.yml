@@ -42,13 +42,14 @@ jobs:
             echo "No JARs were produced in build/libs"
             exit 1
           fi
+          release_version="${GITHUB_REF_NAME#v}"
           for jar in "${jars[@]}"; do
             filename="${jar##*/}"
             if [[ "$filename" =~ \+mc([0-9.]+)-(fabric|forge|neoforge)\.jar$ ]]; then
               game_version="${BASH_REMATCH[1]}"
               loader="${BASH_REMATCH[2]}"
               loader="${loader^}"
-              cp -- "$jar" "release-assets/VisorHolster-${loader}-${game_version}.jar"
+              cp -- "$jar" "release-assets/VisorHolster-${release_version}-${loader}-${game_version}.jar"
             else
               echo "Unexpected JAR filename: $filename"
               exit 1
