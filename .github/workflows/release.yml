@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing GitHub release tag to publish to Modrinth
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -14,6 +20,7 @@ concurrency:
 
 jobs:
   build-and-release:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
@@ -71,4 +78,50 @@ jobs:
           fail_on_unmatched_files: true
           files: release-assets/*.jar
 
+      - name: Publish JARs to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
+          MODRINTH_RELEASE_TAG: ${{ github.ref_name }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+        run: python3 scripts/publish_modrinth.py
 
+  publish-existing-release:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download JARs from the existing GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$RELEASE_TAG" != v* ]]; then
+            echo "Release tag must start with v, got: $RELEASE_TAG"
+            exit 1
+          fi
+          mkdir -p release-assets
+          gh release download "$RELEASE_TAG" --dir release-assets --repo "$REPOSITORY"
+          shopt -s nullglob
+          jars=(release-assets/*.jar)
+          if (( ${#jars[@]} == 0 )); then
+            echo "The GitHub Release $RELEASE_TAG contains no JAR files"
+            exit 1
+          fi
+          ls -1 release-assets
+
+      - name: Publish existing JARs to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
+          MODRINTH_RELEASE_TAG: ${{ inputs.release_tag }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+        run: python3 scripts/publish_modrinth.py
